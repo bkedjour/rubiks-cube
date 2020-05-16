@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubiksCube.Engine", "src\engine\RubiksCube\RubiksCube.Engine\RubiksCube.Engine.csproj", "{9A7065AC-DEFF-4141-A472-3E690D5A8C54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubiksCube.Ui", "src\ui\RubiksCube.Ui\RubiksCube.Ui.csproj", "{108CBC49-36A8-47DB-A60B-057CED7495B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubiksCube.Ui", "src\ui\RubiksCube.Ui\RubiksCube.Ui.csproj", "{108CBC49-36A8-47DB-A60B-057CED7495B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubiksCube.Ui.Base", "src\ui\RubiksCube.Ui.Base\RubiksCube.Ui.Base.csproj", "{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,18 @@ Global
 		{108CBC49-36A8-47DB-A60B-057CED7495B1}.Release|x64.Build.0 = Release|Any CPU
 		{108CBC49-36A8-47DB-A60B-057CED7495B1}.Release|x86.ActiveCfg = Release|Any CPU
 		{108CBC49-36A8-47DB-A60B-057CED7495B1}.Release|x86.Build.0 = Release|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Debug|x64.Build.0 = Debug|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Debug|x86.Build.0 = Debug|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x64.ActiveCfg = Release|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x64.Build.0 = Release|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x86.ActiveCfg = Release|Any CPU
+		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
