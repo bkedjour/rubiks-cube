@@ -5,11 +5,12 @@ using Veldrid;
 
 namespace RubiksCube.Ui
 {
-    public class CellInfo : Component, IDisposable
+    public class CellDecorator : Component, IDisposable
     {
         public Cell Cell { get; }
 
         public Vector3 Translation { get; }
+        
         public Matrix4x4 Rotation { get; set; }
 
         
@@ -25,13 +26,14 @@ namespace RubiksCube.Ui
         private VertexPositionColor[] _vertices;
         private ushort[] _indices;
 
-        public CellInfo(Cell cell, Vector3 translation, ResourceFactory factory, GraphicsDevice graphicsDevice,
+        public CellDecorator(Cell cell, Vector3 translation, ResourceFactory factory, GraphicsDevice graphicsDevice,
             CommandList commandList, Shader[] shaders) : base(graphicsDevice,factory,commandList)
         {
             Cell = cell;
             Translation = translation;
             _shaders = shaders;
-
+            Rotation = Matrix4x4.Identity;
+            
             CreateResources();
         }
 
@@ -114,7 +116,7 @@ namespace RubiksCube.Ui
         {
             base.Update(deltaSeconds, projection, view);
 
-            ProjViewWorld.World = Matrix4x4.CreateTranslation(Translation) * Rotation;
+            ProjViewWorld.World = Matrix4x4.CreateTranslation(Translation) * Cell.Rotation * Rotation;
 
             CommandList.UpdateBuffer(_projViewWorldBuffer, 0, ref ProjViewWorld);
         }

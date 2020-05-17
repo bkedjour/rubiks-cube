@@ -4,7 +4,9 @@ namespace RubiksCube.Engine
 {
     public interface ICube
     {
-        IEnumerable<Face> Faces { get; }
+        IReadOnlyList<Cell> Cells { get; }
+
+        Face GetFace(Side side);
 
         Status Status { get; }
 

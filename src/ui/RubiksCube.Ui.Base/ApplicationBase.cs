@@ -18,7 +18,7 @@ namespace RubiksCube.Ui.Base
             Window.Resized += HandleWindowResize;
             Window.GraphicsDeviceCreated += OnGraphicsDeviceCreated;
             Window.GraphicsDeviceDestroyed += OnDeviceDestroyed;
-            Window.Rendering += PreDraw;
+            Window.Rendering += Update;
             Window.Rendering += Draw;
             Window.KeyPressed += OnKeyDown;
 
@@ -46,7 +46,7 @@ namespace RubiksCube.Ui.Base
             MainSwapchain = null;
         }
 
-        private void PreDraw(float deltaSeconds)
+        protected virtual void Update(float deltaSeconds)
         {
             Camera.Update(deltaSeconds);
         }

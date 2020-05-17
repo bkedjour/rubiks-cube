@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace RubiksCube.Engine
 {
@@ -6,33 +7,33 @@ namespace RubiksCube.Engine
     {
         public ICube CreateCube()
         {
-            var faces = new List<Face>
-            {
-                CreateFace(Color.Yellow, Side.Up),
-                CreateFace(Color.White, Side.Down),
-                CreateFace(Color.Orange, Side.Right),
-                CreateFace(Color.Red, Side.Left),
-                CreateFace(Color.Green, Side.Front),
-                CreateFace(Color.Blue, Side.Back),
-            };
+            var cells = new List<Cell>();
 
-            return new Cube(faces);
+            cells.AddRange(CreateCells(Color.Yellow, Side.Up));
+            cells.AddRange(CreateCells(Color.White, Side.Down));
+            cells.AddRange(CreateCells(Color.Orange, Side.Right));
+            cells.AddRange(CreateCells(Color.Red, Side.Left));
+            cells.AddRange(CreateCells(Color.Green, Side.Front));
+            cells.AddRange(CreateCells(Color.Blue, Side.Back));
+
+            return new Cube(cells);
         }
 
-        private Face CreateFace(Color color, Side side)
+        private IEnumerable<Cell> CreateCells(Color color, Side side)
         {
-            var cells = CreateCells(color);
-            return new Face(cells) {Side = side};
-        }
-
-        private static Cell[,] CreateCells(Color color)
-        {
-            return new[,]
+            var cells = new List<Cell>();
+            for (var row = 0; row < 3; row++)
             {
-                {new Cell(color), new Cell(color), new Cell(color)},
-                {new Cell(color), new Cell(color), new Cell(color)},
-                {new Cell(color), new Cell(color), new Cell(color)}
-            };
+                for (var col = 0; col < 3; col++)
+                {
+                    var cell = new Cell(color, new Vector3(row - 1, (col - 1) * -1, 1), side);
+                    cell.Rotate(Face.GetFaceRotation(side));
+
+                    cells.Add(cell);
+                }
+            }
+
+            return cells;
         }
     }
 }

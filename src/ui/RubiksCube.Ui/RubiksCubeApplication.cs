@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 using RubiksCube.Engine;
 using RubiksCube.Ui.Base;
@@ -15,7 +14,7 @@ namespace RubiksCube.Ui
 
         private readonly ICube _cube;
 
-        private List<CellInfo> _cells;
+        private List<CellDecorator> _cellsDecorators;
 
         public RubiksCubeApplication(IWindow window) : base(window)
         {
@@ -38,70 +37,93 @@ namespace RubiksCube.Ui
 
         private void InitializeCube(ResourceFactory factory)
         {
-            _cells = new List<CellInfo>();
+            _cellsDecorators = new List<CellDecorator>();
 
-            foreach (var face in _cube.Faces)
+            CreateFace(Side.Front, factory);
+            CreateFace(Side.Up, factory);
+            CreateFace(Side.Down, factory);
+            CreateFace(Side.Right, factory);
+            CreateFace(Side.Back, factory);
+            CreateFace(Side.Left, factory);
+        }
+
+        private void CreateFace(Side side, ResourceFactory factory)
+        {
+            var cells = _cube.GetFace(side).Cells;
+            int index = 0;
+            for (int row = 0; row < 3; row++)
             {
-                for (int row = 0; row < face.Cells.GetLength(0); row++)
+                for (int col = 0; col < 3; col++)
                 {
-                    for (int col = 0; col < face.Cells.GetLength(1); col++)
-                    {
-                        _cells.Add(new CellInfo(face.Cells[row, col], new Vector3((row - 1) * 1.05f, (col - 1) * -1.05f, 1.1f), factory, GraphicsDevice,
-                            _commandList, _shaders)
-                        {
-                            Rotation = GetRotation(face.Side)
-                        });
-                    }
+                    _cellsDecorators.Add(new CellDecorator(cells[index], new Vector3((row - 1) * 1.05f, (col - 1) * -1.05f, 1.1f),
+                        factory, GraphicsDevice, _commandList, _shaders));
+
+                    index++;
                 }
-                
             }
         }
 
-        private Matrix4x4 GetRotation(Side side)
+        private Direction direction = Direction.Clockwise;
+        protected override void Update(float deltaSeconds)
         {
-            switch (side)
-            {
-                case Side.Front:
-                    return Matrix4x4.Identity;
-                case Side.Back:
-                    return Matrix4x4.CreateRotationY(DegreesToRadians(180));
-                case Side.Right:
-                    return Matrix4x4.CreateRotationY(DegreesToRadians(90));
-                case Side.Left:
-                    return Matrix4x4.CreateRotationY(DegreesToRadians(-90));
-                case Side.Up:
-                    return Matrix4x4.CreateRotationX(DegreesToRadians(-90));
-                case Side.Down:
-                    return Matrix4x4.CreateRotationX(DegreesToRadians(90));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
-        }
+            base.Update(deltaSeconds);
 
-        private float DegreesToRadians(float degrees)
-        {
-            return degrees * (float)Math.PI / 180f;
-        }
-
-        protected override void Draw(float deltaSeconds)
-        {
             var projection =
                 Matrix4x4.CreatePerspectiveFieldOfView(1.0f, (float)Window.Width / Window.Height, 0.5f, 100f);
 
             var view = Matrix4x4.CreateLookAt(Camera.Position, Camera.Position + Camera.Forward, Vector3.UnitY);
 
-            foreach (var cell in _cells)
+            if (InputTracker.GetKeyDown(Key.C))
             {
-                cell.Rotation *= Matrix4x4.CreateRotationY(deltaSeconds) * Matrix4x4.CreateRotationX(deltaSeconds/2) * Matrix4x4.CreateRotationZ(deltaSeconds/4);
+                direction = direction == Direction.Clockwise ? Direction.Counterclockwise : Direction.Clockwise;
+            }
+
+            if (InputTracker.GetKeyDown(Key.R))
+            {
+                _cube.Move(Side.Right, direction);
+            }
+            if (InputTracker.GetKeyDown(Key.L))
+            {
+                _cube.Move(Side.Left, direction);
+            }
+            if (InputTracker.GetKeyDown(Key.F))
+            {
+                _cube.Move(Side.Front, direction);
+            }
+            if (InputTracker.GetKeyDown(Key.B))
+            {
+                _cube.Move(Side.Back, direction);
+            }
+            if (InputTracker.GetKeyDown(Key.U))
+            {
+                _cube.Move(Side.Up, direction);
+            }
+            if (InputTracker.GetKeyDown(Key.G))
+            {
+                _cube.Move(Side.Down, direction);
+            }
+
+            if (InputTracker.GetKeyDown(Key.O))
+            {
+                _cube.Rotate(Axis.Y, 90);
+            }
+
+            foreach (var cell in _cellsDecorators)
+            {
+                //cell.Rotation *= Matrix4x4.CreateRotationY(deltaSeconds) * Matrix4x4.CreateRotationX(deltaSeconds/2) * Matrix4x4.CreateRotationZ(deltaSeconds/4);
                 cell.Update(deltaSeconds, projection, view);
             }
 
+        }
+
+        protected override void Draw(float deltaSeconds)
+        {
             _commandList.Begin();
             _commandList.SetFramebuffer(GraphicsDevice.SwapchainFramebuffer);
             _commandList.ClearColorTarget(0, RgbaFloat.Black);
             _commandList.ClearDepthStencil(1f);
 
-            foreach (var cell in _cells)
+            foreach (var cell in _cellsDecorators)
                 cell.Draw(deltaSeconds);
 
             _commandList.End();
@@ -117,7 +139,7 @@ namespace RubiksCube.Ui
 
             _commandList.Dispose();
 
-            foreach (var cell in _cells)
+            foreach (var cell in _cellsDecorators)
                 cell.Dispose();
 
             base.OnDeviceDestroyed();
