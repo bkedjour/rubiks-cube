@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using ImGuiNET;
 using RubiksCube.Engine;
 using RubiksCube.Engine.Enums;
 using RubiksCube.Ui.Base;
@@ -64,9 +65,9 @@ namespace RubiksCube.Ui
         }
 
         private Direction direction = Direction.Clockwise;
-        protected override void Update(float deltaSeconds)
+        protected override void Update(float deltaSeconds, InputSnapshot inputSnapshot)
         {
-            base.Update(deltaSeconds);
+            base.Update(deltaSeconds, inputSnapshot);
 
             var projection =
                 Matrix4x4.CreatePerspectiveFieldOfView(1.0f, (float)Window.Width / Window.Height, 0.5f, 100f);
@@ -116,8 +117,47 @@ namespace RubiksCube.Ui
 
         }
 
+        private void DrawText(float deltaSeconds)
+        {
+            ImGui.Begin(string.Empty,
+                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize |
+                ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove);
+            
+            ImGui.SetWindowSize(new Vector2(250,Window.Height));
+            ImGui.SetWindowPos(Vector2.Zero);
+            for (int i = 0; i < 6; i++)
+            {
+                ImGui.Text(((Side)i).ToString());
+
+                var frontFace = _cube.GetFace((Side)i);
+                foreach (var cell in frontFace.Cells)
+                {
+                    var text = $"{cell.Color} P{cell.Position} N{cell.Normal}";
+                    ImGui.TextColored(GetColor(cell.Color), text);
+                }
+            }
+            
+
+            ImGui.End();
+            GuiRenderer.Render(GraphicsDevice, _commandList);
+        }
+
+        private Vector4 GetColor(Color color)
+        {
+            return color switch
+            {
+                Color.Yellow => new Vector4(1,1,0,1),
+                Color.White => new Vector4(1,1,1,1),
+                Color.Green => new Vector4(0,1,0,1),
+                Color.Blue => new Vector4(0,0,1,1),
+                Color.Orange => new Vector4(1,0.36f,0,1),
+                Color.Red => new Vector4(1,0,0,1)
+            };
+        }
+
         protected override void Draw(float deltaSeconds)
         {
+
             _commandList.Begin();
             _commandList.SetFramebuffer(GraphicsDevice.SwapchainFramebuffer);
             _commandList.ClearColorTarget(0, RgbaFloat.Black);
@@ -125,6 +165,8 @@ namespace RubiksCube.Ui
 
             foreach (var cell in _cellsDecorators)
                 cell.Draw(deltaSeconds);
+
+            DrawText(deltaSeconds);
 
             _commandList.End();
 

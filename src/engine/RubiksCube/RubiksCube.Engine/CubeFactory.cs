@@ -27,7 +27,7 @@ namespace RubiksCube.Engine
             {
                 for (var col = 0; col < 3; col++)
                 {
-                    var cell = new Cell(color, new Vector3(row - 1, (col - 1) * -1, 1), side);
+                    var cell = new Cell(color, new Vector3(row - 1, (col - 1) * -1, 1));
                     cell.Rotate(Face.GetFaceRotation(side));
 
                     cells.Add(cell);

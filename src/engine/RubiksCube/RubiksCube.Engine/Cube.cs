@@ -8,7 +8,7 @@ namespace RubiksCube.Engine
 {
     public class Cube : ICube
     {
-        public Face GetFace(Side side) => new Face(_cells.Where(c => c.Side == side).ToList(), side);
+        public Face GetFace(Side side) => new Face(GetSideCells(side), side);
         
         public Status Status
         {
@@ -72,6 +72,20 @@ namespace RubiksCube.Engine
                 Side.Left => _cells.Where(c => Math.Abs(c.Position.X - (-1)) < float.Epsilon).ToList(),
                 Side.Up => _cells.Where(c => Math.Abs(c.Position.Y - 1) < float.Epsilon).ToList(),
                 Side.Down => _cells.Where(c => Math.Abs(c.Position.Y - (-1)) < float.Epsilon).ToList(),
+                _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
+            };
+        }
+
+        private IReadOnlyList<Cell> GetSideCells(Side side)
+        {
+            return side switch
+            {
+                Side.Front => _cells.Where(c => Math.Abs(c.Normal.Z - 1) < float.Epsilon).ToList(),
+                Side.Back => _cells.Where(c => Math.Abs(c.Normal.Z - (-1)) < float.Epsilon).ToList(),
+                Side.Right => _cells.Where(c => Math.Abs(c.Normal.X - 1) < float.Epsilon).ToList(),
+                Side.Left => _cells.Where(c => Math.Abs(c.Normal.X - (-1)) < float.Epsilon).ToList(),
+                Side.Up => _cells.Where(c => Math.Abs(c.Normal.Y - 1) < float.Epsilon).ToList(),
+                Side.Down => _cells.Where(c => Math.Abs(c.Normal.Y - (-1)) < float.Epsilon).ToList(),
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
         }

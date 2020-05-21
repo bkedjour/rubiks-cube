@@ -12,6 +12,9 @@ namespace RubiksCube.Ui.Base
 
         protected Camera Camera;
 
+        protected ImGuiRenderer GuiRenderer;
+
+
         protected ApplicationBase(IWindow window)
         {
             Window = window;
@@ -19,7 +22,7 @@ namespace RubiksCube.Ui.Base
             Window.GraphicsDeviceCreated += OnGraphicsDeviceCreated;
             Window.GraphicsDeviceDestroyed += OnDeviceDestroyed;
             Window.Rendering += Update;
-            Window.Rendering += Draw;
+            window.Rendering += (deltaSeconds, inputSnapshot) => Draw(deltaSeconds);
             Window.KeyPressed += OnKeyDown;
 
             Camera = new Camera(Window.Width, Window.Height);
@@ -28,6 +31,7 @@ namespace RubiksCube.Ui.Base
         protected virtual void HandleWindowResize()
         {
             Camera.WindowResized(Window.Width, Window.Height);
+            GuiRenderer.WindowResized((int) Window.Width, (int) Window.Height);
         }
 
         public void OnGraphicsDeviceCreated(GraphicsDevice graphicsDevice, ResourceFactory factory, Swapchain swapchain)
@@ -35,6 +39,10 @@ namespace RubiksCube.Ui.Base
             GraphicsDevice = graphicsDevice;
             ResourceFactory = factory;
             MainSwapchain = swapchain;
+
+            GuiRenderer = new ImGuiRenderer(graphicsDevice, GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription,
+                (int)Window.Width, (int) Window.Height);
+
             CreateResources(factory);
             CreateSwapchainResources(factory);
         }
@@ -46,9 +54,10 @@ namespace RubiksCube.Ui.Base
             MainSwapchain = null;
         }
 
-        protected virtual void Update(float deltaSeconds)
+        protected virtual void Update(float deltaSeconds, InputSnapshot inputSnapshot)
         {
             Camera.Update(deltaSeconds);
+            GuiRenderer.Update(deltaSeconds, inputSnapshot);
         }
 
         protected abstract void CreateResources(ResourceFactory factory);

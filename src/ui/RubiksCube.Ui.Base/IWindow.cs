@@ -5,7 +5,7 @@ namespace RubiksCube.Ui.Base
 {
     public interface IWindow
     {
-        event Action<float> Rendering;
+        event Action<float, InputSnapshot> Rendering;
         event Action<GraphicsDevice, ResourceFactory, Swapchain> GraphicsDeviceCreated;
         event Action GraphicsDeviceDestroyed;
         event Action Resized;

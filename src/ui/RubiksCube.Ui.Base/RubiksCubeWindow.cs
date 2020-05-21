@@ -9,7 +9,7 @@ namespace RubiksCube.Ui.Base
 {
     public class RubiksCubeWindow : IWindow
     {
-        public event Action<float> Rendering;
+        public event Action<float, InputSnapshot> Rendering;
         public event Action<GraphicsDevice, ResourceFactory, Swapchain> GraphicsDeviceCreated;
         public event Action GraphicsDeviceDestroyed;
         public event Action Resized;
@@ -75,7 +75,7 @@ namespace RubiksCube.Ui.Base
                     Resized?.Invoke();
                 }
 
-                Rendering?.Invoke(deltaSeconds);
+                Rendering?.Invoke(deltaSeconds, inputSnapshot);
             }
 
             _graphicsDevice.WaitForIdle();

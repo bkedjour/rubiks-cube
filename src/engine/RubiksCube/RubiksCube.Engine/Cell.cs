@@ -9,21 +9,22 @@ namespace RubiksCube.Engine
         
         public Vector3 Position { get; private set; }
 
-        public Side Side { get; }
+        public Vector3 Normal { get; private set; }
 
         public Matrix4x4 Rotation { get; private set; }
 
-        public Cell(Color color, Vector3 position, Side side)
+        public Cell(Color color, Vector3 position)
         {
             Color = color;
             Position = position;
-            Side = side;
             Rotation = Matrix4x4.Identity;
+            Normal = Vector3.UnitZ;
         }
 
         public void Rotate(Matrix4x4 rotation)
         {
             Position = Vector3.Transform(Position, rotation).Round();
+            Normal = Vector3.TransformNormal(Normal, rotation).Round();
             Rotation *= rotation;
         }
     }
