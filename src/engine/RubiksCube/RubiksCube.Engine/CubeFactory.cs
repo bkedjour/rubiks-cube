@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
 {
@@ -19,7 +20,7 @@ namespace RubiksCube.Engine
             return new Cube(cells);
         }
 
-        private IEnumerable<Cell> CreateCells(Color color, Side side)
+        private static IEnumerable<Cell> CreateCells(Color color, Side side)
         {
             var cells = new List<Cell>();
             for (var row = 0; row < 3; row++)

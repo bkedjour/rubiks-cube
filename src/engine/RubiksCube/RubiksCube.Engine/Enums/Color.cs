@@ -1,4 +1,4 @@
-﻿namespace RubiksCube.Engine
+﻿namespace RubiksCube.Engine.Enums
 {
     public enum Color
     {

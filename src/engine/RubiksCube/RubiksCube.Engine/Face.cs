@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
 {
@@ -9,7 +10,7 @@ namespace RubiksCube.Engine
     {
         public IReadOnlyList<Cell> Cells { get; }
 
-        public Side Side { get; set; }
+        public Side Side { get; }
 
         public Status Status
         {
@@ -20,9 +21,10 @@ namespace RubiksCube.Engine
             }
         }
 
-        public Face(IReadOnlyList<Cell> cells)
+        public Face(IReadOnlyList<Cell> cells, Side side)
         {
             Cells = cells;
+            Side = side;
         }
 
         public static Matrix4x4 GetFaceRotation(Side side)

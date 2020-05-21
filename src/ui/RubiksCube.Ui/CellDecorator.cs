@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using RubiksCube.Engine;
+using RubiksCube.Engine.Enums;
 using Veldrid;
 
 namespace RubiksCube.Ui

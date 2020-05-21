@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 using RubiksCube.Engine;
+using RubiksCube.Engine.Enums;
 using RubiksCube.Ui.Base;
 using Veldrid;
 using Veldrid.SPIRV;
