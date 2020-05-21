@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using RubiksCube.Engine;
@@ -15,13 +16,14 @@ namespace RubiksCube.Ui
         private static Shader[] _shaders;
 
         private readonly ICube _cube;
-
         private List<CellDecorator> _cellsDecorators;
+
+        private Vector2 _previousMousePos;
+        private float _yaw;
+        private float _pitch;
 
         public RubiksCubeApplication(IWindow window) : base(window)
         {
-            Camera.Position = new Vector3(0, 0, 5f);
-            
             var cubeFactory = new CubeFactory();
             _cube = cubeFactory.CreateCube();
         }
@@ -58,13 +60,14 @@ namespace RubiksCube.Ui
             {
                 for (var col = 0; col < 3; col++)
                 {
-                    _cellsDecorators.Add(new CellDecorator(cells[index++], new Vector3((row - 1) * 1.05f, (col - 1) * -1.05f, 1.1f),
+                    _cellsDecorators.Add(new CellDecorator(cells[index++], new Vector3((row - 1) * 1.02f, (col - 1) * -1.02f, 1.04f),
                         factory, GraphicsDevice, _commandList, _shaders));
                 }
             }
         }
 
-        private Direction direction = Direction.Clockwise;
+        
+
         protected override void Update(float deltaSeconds, InputSnapshot inputSnapshot)
         {
             base.Update(deltaSeconds, inputSnapshot);
@@ -72,87 +75,72 @@ namespace RubiksCube.Ui
             var projection =
                 Matrix4x4.CreatePerspectiveFieldOfView(1.0f, (float)Window.Width / Window.Height, 0.5f, 100f);
 
-            var view = Matrix4x4.CreateLookAt(Camera.Position, Camera.Position + Camera.Forward, Vector3.UnitY);
+            var view = Matrix4x4.CreateLookAt(new Vector3(3.3f, 3, 4.4f), Vector3.Zero, Vector3.UnitY);
 
-            if (InputTracker.GetKeyDown(Key.C))
-            {
-                direction = direction == Direction.Clockwise ? Direction.Counterclockwise : Direction.Clockwise;
-            }
+            Vector2 mouseDelta = InputTracker.MousePosition - _previousMousePos;
+            _previousMousePos = InputTracker.MousePosition;
 
-            if (InputTracker.GetKeyDown(Key.R))
-            {
-                _cube.Move(Side.Right, direction);
-            }
-            if (InputTracker.GetKeyDown(Key.L))
-            {
-                _cube.Move(Side.Left, direction);
-            }
-            if (InputTracker.GetKeyDown(Key.F))
-            {
-                _cube.Move(Side.Front, direction);
-            }
-            if (InputTracker.GetKeyDown(Key.B))
-            {
-                _cube.Move(Side.Back, direction);
-            }
-            if (InputTracker.GetKeyDown(Key.U))
-            {
-                _cube.Move(Side.Up, direction);
-            }
-            if (InputTracker.GetKeyDown(Key.G))
-            {
-                _cube.Move(Side.Down, direction);
-            }
+            HandleUserInput();
 
-            if (InputTracker.GetKeyDown(Key.O))
+            if (InputTracker.GetMouseButton(MouseButton.Left))
             {
-                _cube.Rotate(Axis.Y, 90);
+                _yaw += mouseDelta.X * 0.007f;
+                _pitch += mouseDelta.Y * 0.007f;
             }
 
             foreach (var cell in _cellsDecorators)
             {
-                cell.Rotation *= Matrix4x4.CreateRotationY(deltaSeconds) * Matrix4x4.CreateRotationX(deltaSeconds/2) * Matrix4x4.CreateRotationZ(deltaSeconds/4);
+                cell.Rotation = Matrix4x4.CreateRotationY(_yaw) * Matrix4x4.CreateRotationX(_pitch);
                 cell.Update(deltaSeconds, projection, view);
             }
 
         }
 
+        private void HandleUserInput()
+        {
+            if (InputTracker.GetKeyDown(Key.R))
+                _cube.Move(Side.Right, Direction.Clockwise);
+
+            if (InputTracker.GetKeyDown(Key.L))
+                _cube.Move(Side.Left, Direction.Clockwise);
+
+            if (InputTracker.GetKeyDown(Key.U))
+                _cube.Move(Side.Up, Direction.Clockwise);
+
+            if (InputTracker.GetKeyDown(Key.D))
+                _cube.Move(Side.Down, Direction.Clockwise);
+
+            if (InputTracker.GetKeyDown(Key.F))
+                _cube.Move(Side.Front, Direction.Clockwise);
+
+            if (InputTracker.GetKeyDown(Key.B))
+                _cube.Move(Side.Back, Direction.Clockwise);
+
+
+            if (InputTracker.GetKeyDown(Key.X))
+                _cube.Rotate(Axis.X, 90);
+
+            if (InputTracker.GetKeyDown(Key.Y))
+                _cube.Rotate(Axis.Y, 90);
+
+            if (InputTracker.GetKeyDown(Key.Z))
+                _cube.Rotate(Axis.Z, 90);
+        }
+
         private void DrawText(float deltaSeconds)
         {
             ImGui.Begin(string.Empty,
-                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize |
+                ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize |
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove);
-            
-            ImGui.SetWindowSize(new Vector2(250,Window.Height));
+            ImGui.SetWindowSize(new Vector2(250, Window.Height));
             ImGui.SetWindowPos(Vector2.Zero);
-            for (int i = 0; i < 6; i++)
-            {
-                ImGui.Text(((Side)i).ToString());
 
-                var frontFace = _cube.GetFace((Side)i);
-                foreach (var cell in frontFace.Cells)
-                {
-                    var text = $"{cell.Color} P{cell.Position} N{cell.Normal}";
-                    ImGui.TextColored(GetColor(cell.Color), text);
-                }
-            }
-            
+            ImGui.Text($"Fps: {Math.Round(Window.Fps)}");
+            ImGui.Text("Faces: R L U D F B");
+            ImGui.Text("CUBE: X Y Z");
 
             ImGui.End();
             GuiRenderer.Render(GraphicsDevice, _commandList);
-        }
-
-        private Vector4 GetColor(Color color)
-        {
-            return color switch
-            {
-                Color.Yellow => new Vector4(1,1,0,1),
-                Color.White => new Vector4(1,1,1,1),
-                Color.Green => new Vector4(0,1,0,1),
-                Color.Blue => new Vector4(0,0,1,1),
-                Color.Orange => new Vector4(1,0.36f,0,1),
-                Color.Red => new Vector4(1,0,0,1)
-            };
         }
 
         protected override void Draw(float deltaSeconds)

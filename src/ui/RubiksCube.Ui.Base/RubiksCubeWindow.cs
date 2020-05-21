@@ -23,6 +23,8 @@ namespace RubiksCube.Ui.Base
         public uint Width => (uint)_window.Width;
         public uint Height => (uint)_window.Height;
 
+        public float Fps { get; private set; }
+
         public RubiksCubeWindow(string title)
         {
             var wci = new WindowCreateInfo
@@ -61,6 +63,7 @@ namespace RubiksCube.Ui.Base
             {
                 var newElapsed = sw.Elapsed.TotalSeconds;
                 var deltaSeconds = (float)(newElapsed - previousElapsed);
+                Fps = 1 / deltaSeconds;
 
                 InputSnapshot inputSnapshot = _window.PumpEvents();
                 InputTracker.UpdateFrameInput(inputSnapshot);

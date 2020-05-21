@@ -14,6 +14,8 @@ namespace RubiksCube.Ui.Base
         uint Width { get; }
         uint Height { get; }
 
+        float Fps { get; }
+
         void Run();
     }
 }
