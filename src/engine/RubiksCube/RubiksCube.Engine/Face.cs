@@ -27,23 +27,16 @@ namespace RubiksCube.Engine
 
         public static Matrix4x4 GetFaceRotation(Side side)
         {
-            switch (side)
+            return side switch
             {
-                case Side.Front:
-                    return Matrix4x4.Identity;
-                case Side.Back:
-                    return Matrix4x4.CreateRotationY(180.ToRadians());
-                case Side.Right:
-                    return Matrix4x4.CreateRotationY(90.ToRadians());
-                case Side.Left:
-                    return Matrix4x4.CreateRotationY(-90.ToRadians());
-                case Side.Up:
-                    return Matrix4x4.CreateRotationX(-90.ToRadians());
-                case Side.Down:
-                    return Matrix4x4.CreateRotationX(90.ToRadians());
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
+                Side.Front => Matrix4x4.Identity,
+                Side.Back => Matrix4x4.CreateRotationY(180.ToRadians()),
+                Side.Right => Matrix4x4.CreateRotationY(90.ToRadians()),
+                Side.Left => Matrix4x4.CreateRotationY(-90.ToRadians()),
+                Side.Up => Matrix4x4.CreateRotationX(-90.ToRadians()),
+                Side.Down => Matrix4x4.CreateRotationX(90.ToRadians()),
+                _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
+            };
         }
     }
 }

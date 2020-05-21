@@ -1,5 +1,4 @@
 ﻿using RubiksCube.Ui.Base;
-using Veldrid;
 
 namespace RubiksCube.Ui
 {

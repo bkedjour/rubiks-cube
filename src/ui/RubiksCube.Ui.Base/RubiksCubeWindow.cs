@@ -45,13 +45,8 @@ namespace RubiksCube.Ui.Base
         }
         public void Run()
         {
-            var options = new GraphicsDeviceOptions(
-                debug: false,
-                swapchainDepthFormat: PixelFormat.R16_UNorm,
-                syncToVerticalBlank: true,
-                resourceBindingModel: ResourceBindingModel.Improved,
-                preferDepthRangeZeroToOne: true,
-                preferStandardClipSpaceYDirection: true);
+            var options = new GraphicsDeviceOptions(false, PixelFormat.R16_UNorm, true, ResourceBindingModel.Improved,
+                true, true);
 #if DEBUG
             options.Debug = true;
 #endif
@@ -60,12 +55,12 @@ namespace RubiksCube.Ui.Base
             GraphicsDeviceCreated?.Invoke(_graphicsDevice, _factory, _graphicsDevice.MainSwapchain);
 
             var sw = Stopwatch.StartNew();
-            double previousElapsed = sw.Elapsed.TotalSeconds;
+            var previousElapsed = sw.Elapsed.TotalSeconds;
 
             while (_window.Exists)
             {
-                double newElapsed = sw.Elapsed.TotalSeconds;
-                float deltaSeconds = (float)(newElapsed - previousElapsed);
+                var newElapsed = sw.Elapsed.TotalSeconds;
+                var deltaSeconds = (float)(newElapsed - previousElapsed);
 
                 InputSnapshot inputSnapshot = _window.PumpEvents();
                 InputTracker.UpdateFrameInput(inputSnapshot);

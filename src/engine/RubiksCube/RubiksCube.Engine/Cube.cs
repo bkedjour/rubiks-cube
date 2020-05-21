@@ -9,29 +9,24 @@ namespace RubiksCube.Engine
     {
         public IReadOnlyList<Cell> Cells { get; }
 
-        public Cube(IReadOnlyList<Cell> cells)
-        {
-            Cells = cells;
-        }
-        
-        public Face GetFace(Side side)
-        {
-            return new Face(Cells.Where(c => c.Side == side).ToList()) {Side = side};
-        }
+        public Face GetFace(Side side) => new Face(Cells.Where(c => c.Side == side).ToList()) { Side = side };
 
         public Status Status
         {
             get
             {
-                var faces = new List<Face>
-                {
-                    GetFace(Side.Front), GetFace(Side.Right), GetFace(Side.Back), GetFace(Side.Left),
-                    GetFace(Side.Up), GetFace(Side.Down)
-                };
+                var faces = new List<Face>();
+                for (var i = 0; i < 6; i++)
+                    faces.Add(GetFace((Side) i));
+                
                 return faces.All(f => f.Status == Status.Solved) ? Status.Solved : Status.NotSolved;
             }
         }
 
+        public Cube(IReadOnlyList<Cell> cells)
+        {
+            Cells = cells;
+        }
 
         public void Shuffle()
         {
@@ -40,21 +35,13 @@ namespace RubiksCube.Engine
 
         public void Rotate(Axis axis, int angle)
         {
-            Matrix4x4 rotation;
-            switch (axis)
+            var rotation = axis switch
             {
-                case Axis.X:
-                    rotation = Matrix4x4.CreateRotationX(angle.ToRadians());
-                    break;
-                case Axis.Y:
-                    rotation = Matrix4x4.CreateRotationY(angle.ToRadians());
-                    break;
-                case Axis.Z:
-                    rotation = Matrix4x4.CreateRotationZ(angle.ToRadians());
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(axis), axis, null);
-            }
+                Axis.X => Matrix4x4.CreateRotationX(angle.ToRadians()),
+                Axis.Y => Matrix4x4.CreateRotationY(angle.ToRadians()),
+                Axis.Z => Matrix4x4.CreateRotationZ(angle.ToRadians()),
+                _ => throw new ArgumentOutOfRangeException(nameof(axis), axis, null)
+            };
 
             foreach (var cell in Cells)
                 cell.Rotate(rotation);
@@ -62,63 +49,35 @@ namespace RubiksCube.Engine
 
         public void Move(Side side, Direction direction)
         {
-            var cells = GetSideCells(side);
-            var rotationValue = 90.ToRadians();
+            var rotationAngle = 90.ToRadians();
 
-            foreach (var cell in cells)
+            var rotation = side switch
             {
-                //cell.Color = Color.Pink;
-                switch (side)
-                {
-                    case Side.Front:
-                        cell.Rotate(
-                            Matrix4x4.CreateRotationZ(direction == Direction.Clockwise ? -rotationValue : rotationValue));
-                        break;
-                    case Side.Back:
-                        cell.Rotate(
-                            Matrix4x4.CreateRotationZ(direction == Direction.Clockwise ? rotationValue : -rotationValue));
-                        break;
-                    case Side.Right:
-                        cell.Rotate(
-                            Matrix4x4.CreateRotationX(direction == Direction.Clockwise ? -rotationValue : rotationValue));
-                        break;
-                    case Side.Left:
-                        cell.Rotate(
-                            Matrix4x4.CreateRotationX(direction == Direction.Clockwise ? rotationValue : -rotationValue));
-                        break;
-                    case Side.Up:
-                        cell.Rotate(
-                            Matrix4x4.CreateRotationY(direction == Direction.Clockwise ? -rotationValue : rotationValue));
-                        break;
-                    case Side.Down:
-                        cell.Rotate(
-                            Matrix4x4.CreateRotationY(direction == Direction.Clockwise ? rotationValue : -rotationValue));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(side), side, null);
-                }
-            }
+                Side.Front => Matrix4x4.CreateRotationZ(direction == Direction.Clockwise ? -rotationAngle : rotationAngle),
+                Side.Back => Matrix4x4.CreateRotationZ(direction == Direction.Clockwise ? rotationAngle : -rotationAngle),
+                Side.Right => Matrix4x4.CreateRotationX(direction == Direction.Clockwise ? -rotationAngle : rotationAngle),
+                Side.Left => Matrix4x4.CreateRotationX(direction == Direction.Clockwise ? rotationAngle : -rotationAngle),
+                Side.Up => Matrix4x4.CreateRotationY(direction == Direction.Clockwise ? -rotationAngle : rotationAngle),
+                Side.Down => Matrix4x4.CreateRotationY(direction == Direction.Clockwise ? rotationAngle : -rotationAngle),
+                _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
+            };
+
+            foreach (var cell in GetSideCells(side))
+                cell.Rotate(rotation);
         }
 
         private IReadOnlyList<Cell> GetSideCells(Side side)
         {
-            switch (side)
+            return side switch
             {
-                case Side.Front:
-                    return Cells.Where(c => c.Position.Z == 1).ToList();
-                case Side.Back:
-                    return Cells.Where(c => c.Position.Z == -1).ToList();
-                case Side.Right:
-                    return Cells.Where(c => c.Position.X == 1).ToList();
-                case Side.Left:
-                    return Cells.Where(c => c.Position.X == -1).ToList();
-                case Side.Up:
-                    return Cells.Where(c => c.Position.Y == 1).ToList();
-                case Side.Down:
-                    return Cells.Where(c => c.Position.Y == -1).ToList();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
+                Side.Front => Cells.Where(c => Math.Abs(c.Position.Z - 1) < float.Epsilon).ToList(),
+                Side.Back => Cells.Where(c => Math.Abs(c.Position.Z - (-1)) < float.Epsilon).ToList(),
+                Side.Right => Cells.Where(c => Math.Abs(c.Position.X - 1) < float.Epsilon).ToList(),
+                Side.Left => Cells.Where(c => Math.Abs(c.Position.X - (-1)) < float.Epsilon).ToList(),
+                Side.Up => Cells.Where(c => Math.Abs(c.Position.Y - 1) < float.Epsilon).ToList(),
+                Side.Down => Cells.Where(c => Math.Abs(c.Position.Y - (-1)) < float.Epsilon).ToList(),
+                _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
+            };
         }
     }
 }

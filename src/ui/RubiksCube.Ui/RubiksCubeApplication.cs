@@ -50,15 +50,14 @@ namespace RubiksCube.Ui
         private void CreateFace(Side side, ResourceFactory factory)
         {
             var cells = _cube.GetFace(side).Cells;
-            int index = 0;
-            for (int row = 0; row < 3; row++)
+            var index = 0;
+            
+            for (var row = 0; row < 3; row++)
             {
-                for (int col = 0; col < 3; col++)
+                for (var col = 0; col < 3; col++)
                 {
-                    _cellsDecorators.Add(new CellDecorator(cells[index], new Vector3((row - 1) * 1.05f, (col - 1) * -1.05f, 1.1f),
+                    _cellsDecorators.Add(new CellDecorator(cells[index++], new Vector3((row - 1) * 1.05f, (col - 1) * -1.05f, 1.1f),
                         factory, GraphicsDevice, _commandList, _shaders));
-
-                    index++;
                 }
             }
         }
@@ -110,7 +109,7 @@ namespace RubiksCube.Ui
 
             foreach (var cell in _cellsDecorators)
             {
-                //cell.Rotation *= Matrix4x4.CreateRotationY(deltaSeconds) * Matrix4x4.CreateRotationX(deltaSeconds/2) * Matrix4x4.CreateRotationZ(deltaSeconds/4);
+                cell.Rotation *= Matrix4x4.CreateRotationY(deltaSeconds) * Matrix4x4.CreateRotationX(deltaSeconds/2) * Matrix4x4.CreateRotationZ(deltaSeconds/4);
                 cell.Update(deltaSeconds, projection, view);
             }
 

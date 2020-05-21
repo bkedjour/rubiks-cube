@@ -17,7 +17,7 @@ namespace RubiksCube.Ui
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
 
-        private Shader[] _shaders;
+        private readonly Shader[] _shaders;
         private Pipeline _pipeline;
 
         private DeviceBuffer _projViewWorldBuffer;
@@ -77,12 +77,13 @@ namespace RubiksCube.Ui
 
         private void CreateVertices()
         {
+            var color = GetRgbaColor(Cell.Color);
             _vertices = new[]
             {
-                new VertexPositionColor(new Vector3(-.5f, .5f, .5f), GetRgbaColor(Cell.Color)),
-                new VertexPositionColor(new Vector3(.5f, .5f, .5f), GetRgbaColor(Cell.Color)),
-                new VertexPositionColor(new Vector3(.5f, -.5f, .5f), GetRgbaColor(Cell.Color)),
-                new VertexPositionColor(new Vector3(-.5f, -.5f, .5f), GetRgbaColor(Cell.Color))
+                new VertexPositionColor(new Vector3(-.5f, .5f, .5f), color),
+                new VertexPositionColor(new Vector3(.5f, .5f, .5f), color),
+                new VertexPositionColor(new Vector3(.5f, -.5f, .5f), color),
+                new VertexPositionColor(new Vector3(-.5f, -.5f, .5f), color)
             };
 
             _indices = new ushort[]
@@ -93,23 +94,16 @@ namespace RubiksCube.Ui
 
         private RgbaFloat GetRgbaColor(Color color)
         {
-            switch (color)
+            return color switch
             {
-                case Color.Yellow:
-                    return RgbaFloat.Yellow;
-                case Color.White:
-                    return RgbaFloat.White;
-                case Color.Green:
-                    return RgbaFloat.Green;
-                case Color.Blue:
-                    return RgbaFloat.Blue;
-                case Color.Orange:
-                    return RgbaFloat.Orange;
-                case Color.Red:
-                    return RgbaFloat.DarkRed;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(color), color, null);
-            }
+                Color.Yellow => RgbaFloat.Yellow,
+                Color.White => RgbaFloat.White,
+                Color.Green => RgbaFloat.Green,
+                Color.Blue => RgbaFloat.Blue,
+                Color.Orange => RgbaFloat.Orange,
+                Color.Red => RgbaFloat.DarkRed,
+                _ => throw new ArgumentOutOfRangeException(nameof(color), color, null)
+            };
         }
 
         public override void Update(float deltaSeconds, Matrix4x4 projection, Matrix4x4 view)

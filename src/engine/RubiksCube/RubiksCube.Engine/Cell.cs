@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace RubiksCube.Engine
 {
@@ -23,10 +22,7 @@ namespace RubiksCube.Engine
 
         public void Rotate(Matrix4x4 rotation)
         {
-            var transform = Vector3.Transform(Position, rotation);
-            Position = new Vector3((float) Math.Round(transform.X), (float) Math.Round(transform.Y),
-                (float) Math.Round(transform.Z));
-
+            Position = Vector3.Transform(Position, rotation).Round();
             Rotation *= rotation;
         }
     }
