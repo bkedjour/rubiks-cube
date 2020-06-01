@@ -9,12 +9,12 @@ namespace RubiksCube.Ui
     public class CellDecorator : Component, IDisposable
     {
         public Cell Cell { get; }
-
         public Vector3 Translation { get; }
-        
         public Matrix4x4 Rotation { get; set; }
-
+        public Matrix4x4 AnimationRotation { get; set; }
         
+        private Matrix4x4 _previousRotation;
+
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
 
@@ -27,14 +27,17 @@ namespace RubiksCube.Ui
         private VertexPositionColor[] _vertices;
         private ushort[] _indices;
 
+        private readonly AnimationPlayer _animationPlayer;
+
         public CellDecorator(Cell cell, Vector3 translation, ResourceFactory factory, GraphicsDevice graphicsDevice,
-            CommandList commandList, Shader[] shaders) : base(graphicsDevice,factory,commandList)
+            CommandList commandList, Shader[] shaders, AnimationPlayer animationPlayer) : base(graphicsDevice, factory, commandList)
         {
             Cell = cell;
+            _previousRotation = cell.RotationInfo.RotationMatrix;
             Translation = translation;
             _shaders = shaders;
+            _animationPlayer = animationPlayer;
             Rotation = Matrix4x4.Identity;
-            
             CreateResources();
         }
 
@@ -111,7 +114,16 @@ namespace RubiksCube.Ui
         {
             base.Update(deltaSeconds, projection, view);
 
-            ProjViewWorld.World = Matrix4x4.CreateTranslation(Translation) * Cell.Rotation * Rotation;
+            if (_previousRotation != Cell.RotationInfo.RotationMatrix)
+            {
+                _animationPlayer.Play(_previousRotation, Cell.RotationInfo, this);
+            }
+
+            _previousRotation = Cell.RotationInfo.RotationMatrix;
+
+            if (!_animationPlayer.AnimationInProgress) AnimationRotation = Cell.RotationInfo.RotationMatrix;
+            
+            ProjViewWorld.World = Matrix4x4.CreateTranslation(Translation) * AnimationRotation * Rotation;
 
             CommandList.UpdateBuffer(_projViewWorldBuffer, 0, ref ProjViewWorld);
         }

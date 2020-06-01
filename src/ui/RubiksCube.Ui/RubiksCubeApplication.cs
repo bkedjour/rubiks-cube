@@ -22,10 +22,13 @@ namespace RubiksCube.Ui
         private float _yaw;
         private float _pitch;
 
+        private readonly AnimationPlayer _animationPlayer;
+
         public RubiksCubeApplication(IWindow window) : base(window)
         {
             var cubeFactory = new CubeFactory();
             _cube = cubeFactory.CreateCube();
+            _animationPlayer = new AnimationPlayer();
         }
 
         protected override void CreateResources(ResourceFactory factory)
@@ -60,8 +63,9 @@ namespace RubiksCube.Ui
             {
                 for (var col = 0; col < 3; col++)
                 {
-                    _cellsDecorators.Add(new CellDecorator(cells[index++], new Vector3((row - 1) * 1.02f, (col - 1) * -1.02f, 1.04f),
-                        factory, GraphicsDevice, _commandList, _shaders));
+                    _cellsDecorators.Add(new CellDecorator(cells[index++],
+                        new Vector3((row - 1) * 1.02f, (col - 1) * -1.02f, 1.04f),
+                        factory, GraphicsDevice, _commandList, _shaders, _animationPlayer));
                 }
             }
         }
@@ -88,6 +92,8 @@ namespace RubiksCube.Ui
                 _pitch += mouseDelta.Y * 0.007f;
             }
 
+            _animationPlayer.Update(deltaSeconds);
+
             foreach (var cell in _cellsDecorators)
             {
                 cell.Rotation = Matrix4x4.CreateRotationY(_yaw) * Matrix4x4.CreateRotationX(_pitch);
@@ -98,11 +104,19 @@ namespace RubiksCube.Ui
 
         private void HandleUserInput()
         {
+            if (_animationPlayer.AnimationInProgress) return;
+
             if (InputTracker.GetKeyDown(Key.R))
                 _cube.Move(Side.Right, Direction.Clockwise);
 
+            if (InputTracker.GetKeyDown(Key.T))
+                _cube.Move(Side.Right, Direction.Counterclockwise);
+
             if (InputTracker.GetKeyDown(Key.L))
                 _cube.Move(Side.Left, Direction.Clockwise);
+
+            if (InputTracker.GetKeyDown(Key.M))
+                _cube.Move(Side.Left, Direction.Counterclockwise);
 
             if (InputTracker.GetKeyDown(Key.U))
                 _cube.Move(Side.Up, Direction.Clockwise);
@@ -132,7 +146,7 @@ namespace RubiksCube.Ui
             ImGui.Begin(string.Empty,
                 ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoResize |
                 ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove);
-            ImGui.SetWindowSize(new Vector2(250, Window.Height));
+            ImGui.SetWindowSize(new Vector2(Window.Width, Window.Height));
             ImGui.SetWindowPos(Vector2.Zero);
 
             ImGui.Text($"Fps: {Math.Round(Window.Fps)}");

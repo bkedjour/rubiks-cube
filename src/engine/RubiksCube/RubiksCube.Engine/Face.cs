@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
@@ -27,16 +26,16 @@ namespace RubiksCube.Engine
             Side = side;
         }
 
-        public static Matrix4x4 GetFaceRotation(Side side)
+        public static RotationInfo GetFaceRotation(Side side)
         {
             return side switch
             {
-                Side.Front => Matrix4x4.Identity,
-                Side.Back => Matrix4x4.CreateRotationY(180.ToRadians()),
-                Side.Right => Matrix4x4.CreateRotationY(90.ToRadians()),
-                Side.Left => Matrix4x4.CreateRotationY(-90.ToRadians()),
-                Side.Up => Matrix4x4.CreateRotationX(-90.ToRadians()),
-                Side.Down => Matrix4x4.CreateRotationX(90.ToRadians()),
+                Side.Front => new RotationInfo(),
+                Side.Back => new RotationInfo(Axis.Y, 180),
+                Side.Right => new RotationInfo(Axis.Y, 90),
+                Side.Left => new RotationInfo(Axis.Y, -90),
+                Side.Up => new RotationInfo(Axis.X, -90),
+                Side.Down => new RotationInfo(Axis.X, 90),
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
         }

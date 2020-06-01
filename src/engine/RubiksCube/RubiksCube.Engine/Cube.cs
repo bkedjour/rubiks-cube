@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
@@ -31,35 +30,30 @@ namespace RubiksCube.Engine
 
         public void Rotate(Axis axis, int angle)
         {
-            var rotation = axis switch
-            {
-                Axis.X => Matrix4x4.CreateRotationX(angle.ToRadians()),
-                Axis.Y => Matrix4x4.CreateRotationY(angle.ToRadians()),
-                Axis.Z => Matrix4x4.CreateRotationZ(angle.ToRadians()),
-                _ => throw new ArgumentOutOfRangeException(nameof(axis), axis, null)
-            };
-
             foreach (var cell in _cells)
-                cell.Rotate(rotation);
+                cell.Rotate(new RotationInfo(axis, angle));
         }
 
         public void Move(Side side, Direction direction)
         {
-            var angle = 90.ToRadians();
+            const int angle = 90;
 
-            var rotation = side switch
+            var negativeAngle = direction == Direction.Clockwise ? -angle : angle;
+            var positiveAngle = direction == Direction.Clockwise ? angle : -angle;
+
+            var (axis, rotationAngle) = side switch
             {
-                Side.Front => Matrix4x4.CreateRotationZ(direction == Direction.Clockwise ? -angle : angle),
-                Side.Back => Matrix4x4.CreateRotationZ(direction == Direction.Clockwise ? angle : -angle),
-                Side.Right => Matrix4x4.CreateRotationX(direction == Direction.Clockwise ? -angle : angle),
-                Side.Left => Matrix4x4.CreateRotationX(direction == Direction.Clockwise ? angle : -angle),
-                Side.Up => Matrix4x4.CreateRotationY(direction == Direction.Clockwise ? -angle : angle),
-                Side.Down => Matrix4x4.CreateRotationY(direction == Direction.Clockwise ? angle : -angle),
+                Side.Front => (Axis.Z, negativeAngle),
+                Side.Back => (Axis.Z, positiveAngle),
+                Side.Right => (Axis.X, negativeAngle),
+                Side.Left => (Axis.X, positiveAngle),
+                Side.Up => (Axis.Y, negativeAngle),
+                Side.Down => (Axis.Y, positiveAngle),
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
 
             foreach (var cell in GetSidePieces(side))
-                cell.Rotate(rotation);
+                cell.Rotate(new RotationInfo(axis, rotationAngle));
         }
 
         private IReadOnlyList<Cell> GetSidePieces(Side side)
