@@ -3,17 +3,19 @@ using Veldrid;
 
 namespace RubiksCube.Ui
 {
-    public struct VertexPositionColor
+    public struct VertexInfo
     {
         public Vector3 Position; // This is the position, in normalized device coordinates.
-        public RgbaFloat Color; // This is the color of the vertex.
+        public RgbaFloat Color;
+        public Vector2 Uv;
 
-        public const uint SizeInBytes = 28;
+        public const uint SizeInBytes = 36;
 
-        public VertexPositionColor(Vector3 position, RgbaFloat color)
+        public VertexInfo(Vector3 position, RgbaFloat color, Vector2 uv)
         {
             Position = position;
             Color = color;
+            Uv = uv;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
 using ImGuiNET;
 using RubiksCube.Engine;
@@ -51,15 +52,24 @@ namespace RubiksCube.Ui
         {
             _cellsDecorators = new List<CellDecorator>();
 
-            CreateFace(Side.Front, factory);
-            CreateFace(Side.Up, factory);
-            CreateFace(Side.Down, factory);
-            CreateFace(Side.Right, factory);
-            CreateFace(Side.Back, factory);
-            CreateFace(Side.Left, factory);
+            var processor = new ImageSharpProcessor();
+            ProcessedTexture processedTexture;
+            using (var fs = File.OpenRead(@"assets\cell.png"))
+            {
+                processedTexture = processor.Process(fs);
+            }
+
+            var texture = processedTexture.CreateDeviceTexture(GraphicsDevice, factory, TextureUsage.Sampled);
+
+            CreateFace(Side.Front, factory, texture);
+            CreateFace(Side.Up, factory, texture);
+            CreateFace(Side.Down, factory, texture);
+            CreateFace(Side.Right, factory, texture);
+            CreateFace(Side.Back, factory, texture);
+            CreateFace(Side.Left, factory, texture);
         }
 
-        private void CreateFace(Side side, ResourceFactory factory)
+        private void CreateFace(Side side, ResourceFactory factory, Texture texture)
         {
             var cells = _cube.GetFace(side).Cells;
             var index = 0;
@@ -69,8 +79,8 @@ namespace RubiksCube.Ui
                 for (var col = 0; col < 3; col++)
                 {
                     _cellsDecorators.Add(new CellDecorator(cells[index++],
-                        new Vector3((row - 1) * 1.02f, (col - 1) * -1.02f, 1.04f),
-                        factory, GraphicsDevice, _commandList, _shaders, _animationPlayer));
+                        new Vector3((row - 1), -(col - 1), 1),
+                        factory, GraphicsDevice, _commandList, _shaders, _animationPlayer, texture));
                 }
             }
         }
