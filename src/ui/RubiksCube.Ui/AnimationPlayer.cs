@@ -30,7 +30,7 @@ namespace RubiksCube.Ui
 
             foreach (var animation in _animations)
             {
-                animation.Angle += deltaSeconds * 250 * (animation.TargetRotation.Angle < 0 ? -1 : 1);
+                animation.Angle += deltaSeconds * 400 * (animation.TargetRotation.Angle < 0 ? -1 : 1);
                 if (Math.Abs(animation.Angle) > Math.Abs(animation.Cell.Cell.RotationInfo.Angle))
                     animation.Angle = animation.Cell.Cell.RotationInfo.Angle;
 

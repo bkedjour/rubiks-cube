@@ -4,6 +4,7 @@ using System.Numerics;
 using ImGuiNET;
 using RubiksCube.Engine;
 using RubiksCube.Engine.Enums;
+using RubiksCube.Manipulation;
 using RubiksCube.Ui.Base;
 using Veldrid;
 using Veldrid.SPIRV;
@@ -24,11 +25,15 @@ namespace RubiksCube.Ui
 
         private readonly AnimationPlayer _animationPlayer;
 
+        private readonly Shuffler _shuffler;
+
         public RubiksCubeApplication(IWindow window) : base(window)
         {
             var cubeFactory = new CubeFactory();
             _cube = cubeFactory.CreateCube();
             _animationPlayer = new AnimationPlayer();
+
+            _shuffler = new Shuffler(_cube);
         }
 
         protected override void CreateResources(ResourceFactory factory)
@@ -139,6 +144,9 @@ namespace RubiksCube.Ui
 
             if (InputTracker.GetKeyDown(Key.Z))
                 _cube.Rotate(Axis.Z, 90);
+
+            if(InputTracker.GetKeyDown(Key.S))
+                _shuffler.Shuffle();
         }
 
         private void DrawText(float deltaSeconds)
@@ -152,6 +160,7 @@ namespace RubiksCube.Ui
             ImGui.Text($"Fps: {Math.Round(Window.Fps)}");
             ImGui.Text("Faces: R L U D F B");
             ImGui.Text("CUBE: X Y Z");
+            ImGui.Text("Shuffle: S");
 
             ImGui.End();
             GuiRenderer.Render(GraphicsDevice, _commandList);

@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubiksCube.Engine", "src\en
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubiksCube.Ui", "src\ui\RubiksCube.Ui\RubiksCube.Ui.csproj", "{108CBC49-36A8-47DB-A60B-057CED7495B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubiksCube.Ui.Base", "src\ui\RubiksCube.Ui.Base\RubiksCube.Ui.Base.csproj", "{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RubiksCube.Ui.Base", "src\ui\RubiksCube.Ui.Base\RubiksCube.Ui.Base.csproj", "{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RubiksCube.Manipulation", "src\manipulation\RubiksCube.Manipulation\RubiksCube.Manipulation.csproj", "{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,18 @@ Global
 		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x64.Build.0 = Release|Any CPU
 		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x86.ActiveCfg = Release|Any CPU
 		{52D7C61B-57ED-41B8-BDD3-3F2E45EFDEAB}.Release|x86.Build.0 = Release|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Debug|x64.Build.0 = Debug|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Debug|x86.Build.0 = Debug|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Release|x64.ActiveCfg = Release|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Release|x64.Build.0 = Release|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Release|x86.ActiveCfg = Release|Any CPU
+		{AFF65B30-74AE-464A-AE37-C6F86C5A83C0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

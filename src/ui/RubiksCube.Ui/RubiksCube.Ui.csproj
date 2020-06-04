@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\engine\RubiksCube\RubiksCube.Engine\RubiksCube.Engine.csproj" />
+    <ProjectReference Include="..\..\manipulation\RubiksCube.Manipulation\RubiksCube.Manipulation.csproj" />
     <ProjectReference Include="..\RubiksCube.Ui.Base\RubiksCube.Ui.Base.csproj" />
   </ItemGroup>
 
