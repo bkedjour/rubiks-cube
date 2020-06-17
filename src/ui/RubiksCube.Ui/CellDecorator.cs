@@ -24,6 +24,8 @@ namespace RubiksCube.Ui
         private DeviceBuffer _projViewWorldBuffer;
         private ResourceSet _projViewWorldSet;
         private Texture _texture;
+        private Texture _highLightedTexture;
+        private ResourceLayout _textureLayout;
         private ResourceSet _textureSet;
 
         private VertexInfo[] _vertices;
@@ -32,14 +34,15 @@ namespace RubiksCube.Ui
         private readonly AnimationPlayer _animationPlayer;
 
         public CellDecorator(Cell cell, Vector3 translation, ResourceFactory factory, GraphicsDevice graphicsDevice,
-            CommandList commandList, Shader[] shaders, AnimationPlayer animationPlayer, Texture texture) : base(graphicsDevice, factory, commandList)
+            CommandList commandList, Shader[] shaders, AnimationPlayer animationPlayer, Texture[] textures) : base(graphicsDevice, factory, commandList)
         {
             Cell = cell;
             _previousRotation = cell.RotationInfo.RotationMatrix;
             Translation = translation;
             _shaders = shaders;
             _animationPlayer = animationPlayer;
-            _texture = texture;
+            _texture = textures[0];
+            _highLightedTexture = textures[1];
             Rotation = Matrix4x4.Identity;
             CreateResources();
         }
@@ -61,13 +64,13 @@ namespace RubiksCube.Ui
 
             var textureView = Factory.CreateTextureView(_texture);
 
-            ResourceLayout textureLayout = Factory.CreateResourceLayout(
+            _textureLayout = Factory.CreateResourceLayout(
                 new ResourceLayoutDescription(
                     new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
                     new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
             _textureSet = Factory.CreateResourceSet(new ResourceSetDescription(
-                textureLayout, textureView, GraphicsDevice.Aniso4xSampler));
+                _textureLayout, textureView, GraphicsDevice.Aniso4xSampler));
 
             var pipelineDescription = new GraphicsPipelineDescription
             {
@@ -75,14 +78,15 @@ namespace RubiksCube.Ui
                 DepthStencilState = DepthStencilStateDescription.DepthOnlyLessEqual,
                 RasterizerState = RasterizerStateDescription.Default,
                 PrimitiveTopology = PrimitiveTopology.TriangleList,
-                ResourceLayouts = new[] { projViewWorldLayout, textureLayout },
+                ResourceLayouts = new[] { projViewWorldLayout, _textureLayout },
                 ShaderSet = new ShaderSetDescription(
                     new[]
                     {
                         new VertexLayoutDescription(
                             new VertexElementDescription("Position", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float3),
                             new VertexElementDescription("Color", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float4),
-                            new VertexElementDescription("TexCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2))
+                            new VertexElementDescription("TexCoords", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2),
+                            new VertexElementDescription("HighLighted", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float1))
                     }, _shaders),
                 Outputs = GraphicsDevice.SwapchainFramebuffer.OutputDescription
             };
@@ -126,6 +130,8 @@ namespace RubiksCube.Ui
         {
             base.Update(deltaSeconds, projection, view);
 
+            CheckHighLightedCells();
+
             if (_previousRotation != Cell.RotationInfo.RotationMatrix)
             {
                 _animationPlayer.Play(_previousRotation, Cell.RotationInfo, this);
@@ -138,6 +144,29 @@ namespace RubiksCube.Ui
             ProjViewWorld.World = Matrix4x4.CreateTranslation(Translation) * AnimationRotation * Rotation;
 
             CommandList.UpdateBuffer(_projViewWorldBuffer, 0, ref ProjViewWorld);
+        }
+
+        private void CheckHighLightedCells()
+        {
+            bool changeDetected = false;
+            for (var index = 0; index < _vertices.Length; index++)
+            {
+                var highLighted = Cell.HighLighted ? 1 : 0;
+                if (Math.Abs(_vertices[index].HighLighted - highLighted) > float.Epsilon) changeDetected = true;
+                
+                _vertices[index].HighLighted = highLighted;
+            }
+
+            if (!changeDetected) return;
+
+            GraphicsDevice.UpdateBuffer(_vertexBuffer, 0, _vertices);
+
+            var textureView = Factory.CreateTextureView(Math.Abs(_vertices[0].HighLighted - 1) < float.Epsilon
+                ? _highLightedTexture
+                : _texture);
+
+            _textureSet = Factory.CreateResourceSet(new ResourceSetDescription(
+                _textureLayout, textureView, GraphicsDevice.Aniso4xSampler));
         }
 
         public void Draw(float deltaSeconds)

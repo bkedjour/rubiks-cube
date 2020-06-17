@@ -7,6 +7,9 @@ namespace RubiksCube.Engine
 {
     public class Cube : ICube
     {
+        public readonly LinkedList<CubeMove> _moves = new LinkedList<CubeMove>();
+        private LinkedListNode<CubeMove> _head;
+
         public Face GetFace(Side side) => new Face(GetSideCells(side), side);
         
         public Status Status
@@ -30,8 +33,7 @@ namespace RubiksCube.Engine
 
         public void Rotate(Axis axis, int angle)
         {
-            foreach (var cell in _cells)
-                cell.Rotate(new RotationInfo(axis, angle));
+            _moves.AddLast(new CubeMove(new RotationInfo(axis, angle)));
         }
 
         public void Move(Side side, Direction direction)
@@ -52,8 +54,35 @@ namespace RubiksCube.Engine
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
 
-            foreach (var cell in GetSidePieces(side))
-                cell.Rotate(new RotationInfo(axis, rotationAngle));
+            var cells = GetSidePieces(side);
+            _moves.AddLast(new CubeMove(side, new RotationInfo(axis, rotationAngle)));
+        }
+
+        public bool HasNextMove => _head == null ? _moves.First != null : _head.Next != null;
+
+        public void PlayNextMove()
+        {
+            if (!HasNextMove) return;
+
+            _head = _head == null ? _moves.First : _head.Next;
+
+            var move = _head.Value;
+            var cells = move.Side == (Side) (-1) ? _cells : GetSidePieces(move.Side);
+            foreach (var cell in cells)
+                cell.Rotate(move.RotationInfo);
+        }
+
+        public void HighLight(IEnumerable<Cell> cells)
+        {
+            if (cells == null)
+            {
+                foreach (var cell in _cells)
+                    cell.HighLighted = false;
+                return;
+            }
+
+            foreach (var cell in cells)
+                cell.HighLighted = true;
         }
 
         private IReadOnlyList<Cell> GetSidePieces(Side side)

@@ -13,6 +13,8 @@ namespace RubiksCube.Engine
 
         public RotationInfo RotationInfo { get; }
 
+        public bool HighLighted { get; set; }
+
         public Cell(Color color, Vector3 position)
         {
             Color = color;
