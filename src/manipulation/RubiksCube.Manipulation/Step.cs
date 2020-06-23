@@ -5,15 +5,20 @@ namespace RubiksCube.Manipulation
 {
     public abstract class Step : IStep
     {
-        protected IEnumerable<CubeMove> Moves;
+        protected readonly ICube Cube;
+        protected IList<CubeMove> Moves;
         protected IStep NextStep;
 
-        protected Step(IEnumerable<CubeMove> moves)
+        protected Step(ICube cube, IList<CubeMove> moves)
         {
+            Cube = cube;
             Moves = moves;
         }
 
-        public abstract void Execute(ICube cube);
+        public virtual void Execute()
+        {
+            NextStep?.Execute();
+        }
 
         public IStep SetNext(IStep step)
         {

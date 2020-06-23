@@ -32,5 +32,10 @@ namespace RubiksCube.Engine
                 _ => throw new ArgumentOutOfRangeException(nameof(axis), axis, null)
             };
         }
+
+        public RotationInfo Clone()
+        {
+            return (RotationInfo) this.MemberwiseClone();
+        }
     }
 }

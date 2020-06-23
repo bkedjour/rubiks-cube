@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using RubiksCube.Engine;
-
-namespace RubiksCube.Manipulation
+﻿namespace RubiksCube.Manipulation
 {
     public interface IStep
     {
-        void Execute(ICube cube);
+        void Execute();
 
         IStep SetNext(IStep step);
     }

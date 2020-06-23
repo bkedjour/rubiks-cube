@@ -7,7 +7,7 @@ namespace RubiksCube.Engine
 {
     public class Cube : ICube
     {
-        public readonly LinkedList<CubeMove> _moves = new LinkedList<CubeMove>();
+        private readonly LinkedList<CubeMove> _moves = new LinkedList<CubeMove>();
         private LinkedListNode<CubeMove> _head;
 
         public Face GetFace(Side side) => new Face(GetSideCells(side), side);
@@ -24,11 +24,11 @@ namespace RubiksCube.Engine
             }
         }
 
-        private readonly IReadOnlyList<Cell> _cells;
+        public IReadOnlyList<Cell> Cells { get; }
 
         public Cube(IReadOnlyList<Cell> cells)
         {
-            _cells = cells;
+            Cells = cells;
         }
 
         public void Rotate(Axis axis, int angle)
@@ -58,6 +58,12 @@ namespace RubiksCube.Engine
             _moves.AddLast(new CubeMove(side, new RotationInfo(axis, rotationAngle)));
         }
 
+        public void Move(CubeMove move)
+        {
+            if (move == null) return;
+            _moves.AddLast(move);
+        }
+
         public bool HasNextMove => _head == null ? _moves.First != null : _head.Next != null;
 
         public void PlayNextMove()
@@ -67,7 +73,7 @@ namespace RubiksCube.Engine
             _head = _head == null ? _moves.First : _head.Next;
 
             var move = _head.Value;
-            var cells = move.Side == (Side) (-1) ? _cells : GetSidePieces(move.Side);
+            var cells = move.Side == (Side) (-1) ? Cells : GetSidePieces(move.Side);
             foreach (var cell in cells)
                 cell.Rotate(move.RotationInfo);
         }
@@ -76,7 +82,7 @@ namespace RubiksCube.Engine
         {
             if (cells == null)
             {
-                foreach (var cell in _cells)
+                foreach (var cell in Cells)
                     cell.HighLighted = false;
                 return;
             }
@@ -85,16 +91,21 @@ namespace RubiksCube.Engine
                 cell.HighLighted = true;
         }
 
-        private IReadOnlyList<Cell> GetSidePieces(Side side)
+        public IReadOnlyList<CubeMove> GetMoves()
+        {
+            return _moves.ToList();
+        }
+
+        public IReadOnlyList<Cell> GetSidePieces(Side side)
         {
             return side switch
             {
-                Side.Front => _cells.Where(c => Math.Abs(c.Position.Z - 1) < float.Epsilon).ToList(),
-                Side.Back => _cells.Where(c => Math.Abs(c.Position.Z - (-1)) < float.Epsilon).ToList(),
-                Side.Right => _cells.Where(c => Math.Abs(c.Position.X - 1) < float.Epsilon).ToList(),
-                Side.Left => _cells.Where(c => Math.Abs(c.Position.X - (-1)) < float.Epsilon).ToList(),
-                Side.Up => _cells.Where(c => Math.Abs(c.Position.Y - 1) < float.Epsilon).ToList(),
-                Side.Down => _cells.Where(c => Math.Abs(c.Position.Y - (-1)) < float.Epsilon).ToList(),
+                Side.Front => Cells.Where(c => Math.Abs(c.Position.Z - 1) < float.Epsilon).ToList(),
+                Side.Back => Cells.Where(c => Math.Abs(c.Position.Z - (-1)) < float.Epsilon).ToList(),
+                Side.Right => Cells.Where(c => Math.Abs(c.Position.X - 1) < float.Epsilon).ToList(),
+                Side.Left => Cells.Where(c => Math.Abs(c.Position.X - (-1)) < float.Epsilon).ToList(),
+                Side.Up => Cells.Where(c => Math.Abs(c.Position.Y - 1) < float.Epsilon).ToList(),
+                Side.Down => Cells.Where(c => Math.Abs(c.Position.Y - (-1)) < float.Epsilon).ToList(),
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
         }
@@ -103,12 +114,12 @@ namespace RubiksCube.Engine
         {
             return side switch
             {
-                Side.Front => _cells.Where(c => Math.Abs(c.Normal.Z - 1) < float.Epsilon).ToList(),
-                Side.Back => _cells.Where(c => Math.Abs(c.Normal.Z - (-1)) < float.Epsilon).ToList(),
-                Side.Right => _cells.Where(c => Math.Abs(c.Normal.X - 1) < float.Epsilon).ToList(),
-                Side.Left => _cells.Where(c => Math.Abs(c.Normal.X - (-1)) < float.Epsilon).ToList(),
-                Side.Up => _cells.Where(c => Math.Abs(c.Normal.Y - 1) < float.Epsilon).ToList(),
-                Side.Down => _cells.Where(c => Math.Abs(c.Normal.Y - (-1)) < float.Epsilon).ToList(),
+                Side.Front => Cells.Where(c => Math.Abs(c.Normal.Z - 1) < float.Epsilon).ToList(),
+                Side.Back => Cells.Where(c => Math.Abs(c.Normal.Z - (-1)) < float.Epsilon).ToList(),
+                Side.Right => Cells.Where(c => Math.Abs(c.Normal.X - 1) < float.Epsilon).ToList(),
+                Side.Left => Cells.Where(c => Math.Abs(c.Normal.X - (-1)) < float.Epsilon).ToList(),
+                Side.Up => Cells.Where(c => Math.Abs(c.Normal.Y - 1) < float.Epsilon).ToList(),
+                Side.Down => Cells.Where(c => Math.Abs(c.Normal.Y - (-1)) < float.Epsilon).ToList(),
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
         }

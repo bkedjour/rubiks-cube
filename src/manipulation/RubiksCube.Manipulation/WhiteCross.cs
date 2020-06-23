@@ -5,13 +5,8 @@ namespace RubiksCube.Manipulation
 {
     public class WhiteCross : Step
     {
-        public WhiteCross(IEnumerable<CubeMove> moves) : base(moves)
+        public WhiteCross(ICube cube, IList<CubeMove> moves) : base(cube, moves)
         {
-        }
-
-        public override void Execute(ICube cube)
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

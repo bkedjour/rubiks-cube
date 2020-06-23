@@ -27,6 +27,7 @@ namespace RubiksCube.Ui
         private readonly AnimationPlayer _animationPlayer;
 
         private readonly Shuffler _shuffler;
+        private readonly ISolver _solver;
 
         public RubiksCubeApplication(IWindow window) : base(window)
         {
@@ -35,6 +36,7 @@ namespace RubiksCube.Ui
             _animationPlayer = new AnimationPlayer();
 
             _shuffler = new Shuffler(_cube);
+            _solver = new Cfop();
         }
 
         protected override void CreateResources(ResourceFactory factory)
@@ -188,8 +190,24 @@ namespace RubiksCube.Ui
             ImGui.Text($"Fps: {Math.Round(Window.Fps)}");
             ImGui.Text("Faces: R L U D F B");
             ImGui.Text("CUBE: X Y Z");
-            ImGui.Text("Shuffle: S");
-            ImGui.TextColored(new Vector4(255,0,0,1),$"Moves: {_currentCubeMoveIndex}/{_cube._moves.Count}" );
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.176f, 0.584f, 0.419f, 1));
+            if(ImGui.Button("Shuffle", new Vector2(70, 25)))
+            {
+                _shuffler.Shuffle();
+            }
+
+            ImGui.PopStyleColor();
+
+            if (ImGui.Button("Solve", new Vector2(70, 25)))
+            {
+               var moves = _solver.Solve(_cube);
+               foreach (var cubeMove in moves)
+               {
+                   _cube.Move(cubeMove);
+               }
+            }
+
+            ImGui.TextColored(new Vector4(255,0,0,1),$"Moves: {_currentCubeMoveIndex}/{_cube.GetMoves().Count}" );
 
             ImGui.End();
             GuiRenderer.Render(GraphicsDevice, _commandList);

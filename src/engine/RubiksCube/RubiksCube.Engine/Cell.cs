@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
@@ -11,9 +12,13 @@ namespace RubiksCube.Engine
 
         public Vector3 Normal { get; private set; }
 
-        public RotationInfo RotationInfo { get; }
+        public RotationInfo RotationInfo { get; private set; }
 
         public bool HighLighted { get; set; }
+
+        public int Id { get; }
+
+        private static int _id;
 
         public Cell(Color color, Vector3 position)
         {
@@ -22,6 +27,8 @@ namespace RubiksCube.Engine
             Normal = Vector3.UnitZ;
 
             RotationInfo = new RotationInfo();
+
+            Id = _id++;
         }
 
         public void Rotate(RotationInfo rotationInfo)
@@ -32,6 +39,13 @@ namespace RubiksCube.Engine
             RotationInfo.RotationMatrix *= rotationInfo.RotationMatrix;
             RotationInfo.Axis = rotationInfo.Axis;
             RotationInfo.Angle = rotationInfo.Angle;
+        }
+
+        public Cell Clone()
+        {
+            var clone = (Cell) MemberwiseClone();
+            clone.RotationInfo = RotationInfo.Clone();
+            return clone;
         }
     }
 }

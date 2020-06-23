@@ -5,6 +5,6 @@ namespace RubiksCube.Manipulation
 {
     public interface ISolver
     {
-        IEnumerable<CubeMove> Solve(ICube cube);
+        IList<CubeMove> Solve(ICube cube);
     }
 }
