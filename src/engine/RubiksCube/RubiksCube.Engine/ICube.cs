@@ -26,5 +26,7 @@ namespace RubiksCube.Engine
         void HighLight(IEnumerable<Cell> cells);
 
         IReadOnlyList<CubeMove> GetMoves();
+
+        ICube Clone();
     }
 }
