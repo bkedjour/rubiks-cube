@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
@@ -9,6 +8,8 @@ namespace RubiksCube.Engine
         public Color Color { get; }
 
         public Vector3 Position { get; private set; }
+
+        public Vector3 InitialPosition { get; }
 
         public Vector3 Normal { get; private set; }
 
@@ -24,6 +25,7 @@ namespace RubiksCube.Engine
         {
             Color = color;
             Position = position;
+            InitialPosition = position;
             Normal = Vector3.UnitZ;
 
             RotationInfo = new RotationInfo();
@@ -46,6 +48,11 @@ namespace RubiksCube.Engine
             var clone = (Cell) MemberwiseClone();
             clone.RotationInfo = RotationInfo.Clone();
             return clone;
+        }
+
+        public override string ToString()
+        {
+            return $"{Position} / {Normal}";
         }
     }
 }

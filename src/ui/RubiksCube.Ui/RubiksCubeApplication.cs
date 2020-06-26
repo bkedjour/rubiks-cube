@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using RubiksCube.Engine;
@@ -17,7 +18,7 @@ namespace RubiksCube.Ui
         private static CommandList _commandList;
         private static Shader[] _shaders;
 
-        private readonly Cube _cube;
+        private Cube _cube;
         private List<CellDecorator> _cellsDecorators;
 
         private Vector2 _previousMousePos;
@@ -28,6 +29,8 @@ namespace RubiksCube.Ui
 
         private readonly Shuffler _shuffler;
         private readonly ISolver _solver;
+
+        private bool _playAllMoves;
 
         public RubiksCubeApplication(IWindow window) : base(window)
         {
@@ -47,10 +50,10 @@ namespace RubiksCube.Ui
 
             _commandList = factory.CreateCommandList();
 
-            InitializeCube(factory);
+            InitializeCube();
         }
 
-        private void InitializeCube(ResourceFactory factory)
+        private void InitializeCube()
         {
             _cellsDecorators = new List<CellDecorator>();
 
@@ -61,26 +64,25 @@ namespace RubiksCube.Ui
                 processedTexture = processor.Process(fs);
             }
 
-            var texture = processedTexture.CreateDeviceTexture(GraphicsDevice, factory, TextureUsage.Sampled);
+            var texture = processedTexture.CreateDeviceTexture(GraphicsDevice, ResourceFactory, TextureUsage.Sampled);
 
             using (var fs = File.OpenRead(@"assets\highLighted-cell.png"))
             {
                 processedTexture = processor.Process(fs);
             }
 
-            var highLightedTexture =
-                processedTexture.CreateDeviceTexture(GraphicsDevice, factory, TextureUsage.Sampled);
+            var highLightedTexture = processedTexture.CreateDeviceTexture(GraphicsDevice, ResourceFactory, TextureUsage.Sampled);
             var textures = new[] {texture, highLightedTexture};
 
-            CreateFace(Side.Front, factory, textures);
-            CreateFace(Side.Up, factory, textures);
-            CreateFace(Side.Down, factory, textures);
-            CreateFace(Side.Right, factory, textures);
-            CreateFace(Side.Back, factory, textures);
-            CreateFace(Side.Left, factory, textures);
+            CreateFace(Side.Front, textures);
+            CreateFace(Side.Up, textures);
+            CreateFace(Side.Down, textures);
+            CreateFace(Side.Right, textures);
+            CreateFace(Side.Back, textures);
+            CreateFace(Side.Left, textures);
         }
 
-        private void CreateFace(Side side, ResourceFactory factory, Texture[] textures)
+        private void CreateFace(Side side, Texture[] textures)
         {
             var cells = _cube.GetFace(side).Cells;
             var index = 0;
@@ -89,9 +91,11 @@ namespace RubiksCube.Ui
             {
                 for (var col = 0; col < 3; col++)
                 {
-                    _cellsDecorators.Add(new CellDecorator(cells[index++],
-                        new Vector3((row - 1), -(col - 1), 1),
-                        factory, GraphicsDevice, _commandList, _shaders, _animationPlayer, textures));
+                    var cell = cells[index++];
+                    _cellsDecorators.Add(new CellDecorator(cell,
+                        cell.InitialPosition,
+                        //new Vector3((row - 1), -(col - 1), 1),
+                        ResourceFactory, GraphicsDevice, _commandList, _shaders, _animationPlayer, textures));
                 }
             }
         }
@@ -108,7 +112,9 @@ namespace RubiksCube.Ui
             Vector2 mouseDelta = InputTracker.MousePosition - _previousMousePos;
             _previousMousePos = InputTracker.MousePosition;
 
-            HandleCubeMoves(deltaSeconds);
+            if (_playAllMoves)
+                HandleCubeMoves();
+
             HandleUserInput();
 
             if (InputTracker.GetMouseButton(MouseButton.Left))
@@ -128,13 +134,15 @@ namespace RubiksCube.Ui
         }
 
         private int _currentCubeMoveIndex = 0;
-        private void HandleCubeMoves(float deltaSeconds)
+        private void HandleCubeMoves()
         {
-            if (_cube.HasNextMove && !_animationPlayer.AnimationInProgress)
-            {
-                _cube.PlayNextMove();
-                _currentCubeMoveIndex++;
-            }
+            if (!_cube.HasNextMove)
+                _playAllMoves = false;
+
+            if (!_cube.HasNextMove || _animationPlayer.AnimationInProgress) return;
+
+            _cube.PlayNextMove();
+            _currentCubeMoveIndex++;
         }
 
         private void HandleUserInput()
@@ -191,7 +199,7 @@ namespace RubiksCube.Ui
             ImGui.Text("Faces: R L U D F B");
             ImGui.Text("CUBE: X Y Z");
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.176f, 0.584f, 0.419f, 1));
-            if(ImGui.Button("Shuffle", new Vector2(70, 25)))
+            if (ImGui.Button("Shuffle", new Vector2(70, 25)))
             {
                 _shuffler.Shuffle();
             }
@@ -200,18 +208,67 @@ namespace RubiksCube.Ui
 
             if (ImGui.Button("Solve", new Vector2(70, 25)))
             {
-               var moves = _solver.Solve(_cube);
-               foreach (var cubeMove in moves)
-               {
-                   _cube.Move(cubeMove);
-               }
+                var moves = _solver.Solve(_cube);
+                foreach (var cubeMove in moves)
+                {
+                    _cube.Move(cubeMove);
+                }
             }
 
-            ImGui.TextColored(new Vector4(255,0,0,1),$"Moves: {_currentCubeMoveIndex}/{_cube.GetMoves().Count}" );
+            if (ImGui.Button(">", new Vector2(70, 25)))
+            {
+                HandleCubeMoves();
+            }
+
+            if (ImGui.Button(">>", new Vector2(70, 25)))
+            {
+                _playAllMoves = true;
+            }
+
+            if (ImGui.Button("Simulate", new Vector2(70, 25)))
+            {
+                _movesStats.Clear();
+                for (int i = 0; i < 10000; i++)
+                {
+                    _shuffler.Shuffle();
+                    while (_cube.HasNextMove)
+                    {
+                        HandleCubeMoves();
+                    }
+
+                    var clonedCube = _cube.Clone();
+                    var moves = _solver.Solve(_cube);
+                    foreach (var cubeMove in moves)
+                        _cube.Move(cubeMove);
+
+                    _movesStats.Add(new Tuple<int, ICube>(moves.Count, clonedCube));
+                    while (_cube.HasNextMove)
+                        HandleCubeMoves();
+                }
+
+                _movesStats.Sort((tuple, tuple1) => tuple.Item1.CompareTo(tuple1.Item1));
+            }
+
+            ImGui.TextColored(new Vector4(255, 0, 0, 1), $"Moves: {_currentCubeMoveIndex}/{_cube.GetMoves().Count}");
+
+
+            ImGui.TextColored(new Vector4(0, 255, 255, 1), $"Average: {(_movesStats.Any() ? _movesStats.Average( s=> s.Item1):0)}");
+            ImGui.TextColored(new Vector4(0, 255, 255, 1), $"Faults: {_movesStats.Count(m => m.Item1 > 30)}");
+            
+            for (int i = 0; i < _movesStats.Count; i++)
+            {
+                if (ImGui.Button($"{_movesStats[i].Item1}", new Vector2(70, 25)))
+                {
+                    _cube = (Cube)_movesStats[i].Item2;
+                    InitializeCube();
+                }
+            }
 
             ImGui.End();
             GuiRenderer.Render(GraphicsDevice, _commandList);
         }
+
+        private List<Tuple<int, ICube>> _movesStats = new List<Tuple<int, ICube>>();
 
         protected override void Draw(float deltaSeconds)
         {

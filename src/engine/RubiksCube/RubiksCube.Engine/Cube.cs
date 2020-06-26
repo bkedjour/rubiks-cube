@@ -123,5 +123,10 @@ namespace RubiksCube.Engine
                 _ => throw new ArgumentOutOfRangeException(nameof(side), side, null)
             };
         }
+
+        public ICube Clone()
+        {
+            return new Cube(Cells.Select(cell => cell.Clone()).ToList());
+        }
     }
 }

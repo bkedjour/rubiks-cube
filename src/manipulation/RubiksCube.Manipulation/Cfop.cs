@@ -9,7 +9,7 @@ namespace RubiksCube.Manipulation
         public IList<CubeMove> Solve(ICube cube)
         {
             IList<CubeMove> moves = new List<CubeMove>();
-            var workingCube = CloneCube(cube);
+            var workingCube = cube.Clone();
 
             var initialStep = new Daisy(workingCube, moves);
             initialStep.SetNext(new WhiteCross(workingCube, moves));
@@ -24,11 +24,6 @@ namespace RubiksCube.Manipulation
             }
 
             return moves;
-        }
-
-        private ICube CloneCube(ICube cube)
-        {
-            return new Cube(cube.Cells.Select(cell => cell.Clone()).ToList());
         }
     }
 }
