@@ -1,5 +1,4 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 using RubiksCube.Engine.Enums;
 
 namespace RubiksCube.Engine
