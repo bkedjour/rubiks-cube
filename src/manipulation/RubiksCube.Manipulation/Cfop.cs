@@ -8,11 +8,10 @@ namespace RubiksCube.Manipulation
     {
         public IList<CubeMove> Solve(ICube cube)
         {
-            IList<CubeMove> moves = new List<CubeMove>();
             var workingCube = cube.Clone();
 
-            var initialStep = new Daisy(workingCube, moves);
-            initialStep.SetNext(new WhiteCross(workingCube, moves));
+            var initialStep = new Daisy(workingCube);
+            initialStep.SetNext(new WhiteCross(workingCube));
 
             initialStep.Execute();
 
@@ -23,7 +22,8 @@ namespace RubiksCube.Manipulation
                 cubeCell.HighLighted = cloneCell.HighLighted;
             }
 
-            return moves;
+
+            return workingCube.GetMoves().ToList();
         }
     }
 }

@@ -39,6 +39,10 @@ namespace RubiksCube.Ui
             _animationPlayer = new AnimationPlayer();
 
             _shuffler = new Shuffler(_cube);
+            _shuffler.Shuffle();
+            while (_cube.HasNextMove)
+                _cube.PlayNextMove();
+            _currentCubeMoveIndex = _cube.GetMoves().Count;
             _solver = new Cfop();
         }
 
@@ -133,7 +137,7 @@ namespace RubiksCube.Ui
 
         }
 
-        private int _currentCubeMoveIndex = 0;
+        private int _currentCubeMoveIndex;
         private void HandleCubeMoves()
         {
             if (!_cube.HasNextMove)
@@ -224,11 +228,19 @@ namespace RubiksCube.Ui
             {
                 _playAllMoves = true;
             }
+            if (ImGui.Button(">>>", new Vector2(70, 25)))
+            {
+                while (_cube.HasNextMove)
+                {
+                    _cube.PlayNextMove();
+                }
+            }
 
             if (ImGui.Button("Simulate", new Vector2(70, 25)))
             {
                 _movesStats.Clear();
-                for (int i = 0; i < 10000; i++)
+
+                for (int i = 0; i < 10; i++)
                 {
                     _shuffler.Shuffle();
                     while (_cube.HasNextMove)
@@ -239,11 +251,12 @@ namespace RubiksCube.Ui
                     var clonedCube = _cube.Clone();
                     var moves = _solver.Solve(_cube);
                     foreach (var cubeMove in moves)
+                    {
                         _cube.Move(cubeMove);
+                        _cube.PlayNextMove();
+                    }
 
-                    _movesStats.Add(new Tuple<int, ICube>(moves.Count, clonedCube));
-                    while (_cube.HasNextMove)
-                        HandleCubeMoves();
+                    _movesStats.Add(new Tuple<int, ICube, bool>(moves.Count, clonedCube, IsCubeOk(_cube)));
                 }
 
                 _movesStats.Sort((tuple, tuple1) => tuple.Item1.CompareTo(tuple1.Item1));
@@ -253,22 +266,59 @@ namespace RubiksCube.Ui
 
 
             ImGui.TextColored(new Vector4(0, 255, 255, 1), $"Average: {(_movesStats.Any() ? _movesStats.Average( s=> s.Item1):0)}");
-            ImGui.TextColored(new Vector4(0, 255, 255, 1), $"Faults: {_movesStats.Count(m => m.Item1 > 30)}");
+            ImGui.TextColored(new Vector4(0, 255, 255, 1), $"Faults: {_movesStats.Count(c => !c.Item3)}");
             
+
             for (int i = 0; i < _movesStats.Count; i++)
             {
+                if (!_movesStats[i].Item3)
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.176f, 0f, 0f, 1));
+
                 if (ImGui.Button($"{_movesStats[i].Item1}", new Vector2(70, 25)))
                 {
-                    _cube = (Cube)_movesStats[i].Item2;
+                    _cube = (Cube) _movesStats[i].Item2.Clone();
                     InitializeCube();
+                    _currentCubeMoveIndex = 0;
                 }
+
+                if (!_movesStats[i].Item3)
+                    ImGui.PopStyleColor();
             }
 
             ImGui.End();
             GuiRenderer.Render(GraphicsDevice, _commandList);
         }
+        
+        private List<Tuple<int, ICube, bool>> _movesStats = new List<Tuple<int, ICube,bool>>();
 
-        private List<Tuple<int, ICube>> _movesStats = new List<Tuple<int, ICube>>();
+        bool IsCubeOk(ICube cube)
+        {
+            var center = cube.GetFace(Side.Front).Cells.Single(c => c.Position == new Vector3(0, 0, 1));
+            if (cube.Cells.Single(c => c.Position == new Vector3(0, -1, 1) && c.Normal.Y == -1).Color != Color.White)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(0, -1, 1) && c.Normal.Z == 1).Color != Color.Green)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(1, -1, 0) && c.Normal.Y == -1).Color != Color.White)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(1, -1, 0) && c.Normal.X == 1).Color != Color.Orange)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(0, -1, -1) && c.Normal.Y == -1).Color != Color.White)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(0, -1, -1) && c.Normal.Z == -1).Color != Color.Blue)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(-1, -1, 0) && c.Normal.Y == -1).Color != Color.White)
+                return false;
+
+            if (cube.Cells.Single(c => c.Position == new Vector3(-1, -1, 0) && c.Normal.X == -1).Color != Color.Red)
+                return false;
+            return true;
+        }
 
         protected override void Draw(float deltaSeconds)
         {

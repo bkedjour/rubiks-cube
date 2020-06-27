@@ -52,7 +52,7 @@ namespace RubiksCube.Engine
 
         public override string ToString()
         {
-            return $"{Position} / {Normal}";
+            return $"P:{Position} N:{Normal} C:{Color}";
         }
     }
 }

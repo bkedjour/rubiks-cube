@@ -11,7 +11,7 @@ namespace RubiksCube.Manipulation
     {
         private Dictionary<Tuple<Vector3, Vector3, Vector3>, Action> _playBook;
 
-        public Daisy(ICube cube, IList<CubeMove> moves) : base(cube, moves)
+        public Daisy(ICube cube) : base(cube)
         {
             InitializeDaisyPlayBook();
         }
@@ -32,32 +32,32 @@ namespace RubiksCube.Manipulation
 
             if (Cube.GetFace(Side.Front).Cells.Single(c => c.Position == Vector3.UnitZ).Color == Color.Yellow)
             {
-                Moves.Add(new CubeMove(new RotationInfo(Axis.X, -90)));
+                Cube.Rotate(Axis.X, -90);
                 return;
             }
 
             if (Cube.GetFace(Side.Down).Cells.Single(c => c.Position == -Vector3.UnitY).Color == Color.Yellow)
             {
-                Moves.Add(new CubeMove(new RotationInfo(Axis.X, -90)));
-                Moves.Add(new CubeMove(new RotationInfo(Axis.X, -90)));
+                Cube.Rotate(Axis.X, -90);
+                Cube.Rotate(Axis.X, -90);
                 return;
             }
 
             if (Cube.GetFace(Side.Back).Cells.Single(c => c.Position == -Vector3.UnitZ).Color == Color.Yellow)
             {
-                Moves.Add(new CubeMove(new RotationInfo(Axis.X, 90)));
+                Cube.Rotate(Axis.X, 90);
                 return;
             }
             
             if (Cube.GetFace(Side.Right).Cells.Single(c => c.Position == Vector3.UnitX).Color == Color.Yellow)
             {
-                Moves.Add(new CubeMove(new RotationInfo(Axis.Z, 90)));
+                Cube.Rotate(Axis.Z, 90);
                 return;
             }
             
             if (Cube.GetFace(Side.Left).Cells.Single(c => c.Position == -Vector3.UnitX).Color == Color.Yellow)
             {
-                Moves.Add(new CubeMove(new RotationInfo(Axis.Z, -90)));
+                Cube.Rotate(Axis.Z, -90);
                 return;
             }
         }
@@ -92,11 +92,6 @@ namespace RubiksCube.Manipulation
                 }
 
                 _playBook[key].Invoke();
-            }
-
-            foreach (var move in Cube.GetMoves())
-            {
-                Moves.Add(move);
             }
         }
 
